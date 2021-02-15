@@ -4,14 +4,35 @@ namespace Earl;
 
 class Url
 {
-    private $scheme = 'https';
-    private $host = '';
-    private $port = '';
-    private $user = '';
-    private $pass = '';
-    private $path = '';
-    private $query = [];
-    private $fragment = '';
+    private static $defaultScheme = 'https';
+    private static $defaultHost = '';
+
+    private $scheme;
+    private $host;
+    private $port;
+    private $user;
+    private $pass;
+    private $path;
+    private $query;
+    private $fragment;
+
+    public function __construct()
+    {
+        $this->scheme = self::$defaultScheme;
+        $this->host = self::$defaultHost;
+        $this->port = '';
+        $this->user = '';
+        $this->pass = '';
+        $this->path = '';
+        $this->query = [];
+        $this->fragment = '';
+    }
+
+    public static function defaults(array $arg = [])
+    {
+        self::$defaultScheme = $arg['scheme'] ?? 'https';
+        self::$defaultHost = $arg['host'] ?? '';
+    }
 
     /**
      * @throws \InvalidArgumentException
@@ -27,11 +48,11 @@ class Url
         else if (is_string($obj)) {
             $parsed = parse_url($obj);
             if ($parsed === false) {
-                throw new \InvalidArgumentException("Failed to parse URL string: {$entity}");
+                throw new \InvalidArgumentException("Failed to parse URL string: {$obj}");
             }
 
-            $url->scheme = $parsed['scheme'] ?? 'https';
-            $url->host = $parsed['host'] ?? '';
+            $url->scheme = $parsed['scheme'] ?: self::$defaultScheme;
+            $url->host = $parsed['host'] ?? self::$defaultHost;
             $url->port = $parsed['port'] ?? '';
             $url->user = $parsed['user'] ?? '';
             $url->pass = $parsed['pass'] ?? '';
@@ -40,7 +61,7 @@ class Url
             $url->fragment = $parsed['fragment'] ?? '';
         }
         else {
-            throw new \InvalidArgumentException("Invalid type: " . gettype($entity));
+            throw new \InvalidArgumentException("Invalid type: " . gettype($obj));
         }
 
         return $url;
@@ -68,32 +89,8 @@ class Url
             $url .= ":{$this->port}";
         }
 
-        if (substr($fullPath, 0, 1) !== '/') {
-            $url .= '/';
-        }
-
         return $url . $fullPath;
 
-    }
-
-    public function offsetExists($offset)
-    {
-        return isset($this->query[$offset]);
-    }
-
-    public function offsetGet($offset)
-    {
-        return $this->q($offset);
-    }
-
-    public function offsetSet($offset, $value)
-    {
-        $this->q($offset, $value);
-    }
-
-    public function offsetUnset($offset)
-    {
-        unset($this->query[$offset]);
     }
 
     public function scheme($arg = null)
@@ -128,24 +125,44 @@ class Url
 
     public function path($arg = null)
     {
-        if (func_num_args() === 0) {
+        if (func_num_args() === 0)
+        {
             return $this->path;
         }
 
-        $this->path = $arg;
+        if (is_callable($arg))
+        {
+            $this->path = call_user_func($arg, $this->path);
+        } else {
+            $this->path = $arg;
+        }
+
+        if (strpos($this->path, '/') !== 0)
+        {
+            $this->path = '/' . $this->path;
+        }
         return $this;
     }
 
     public function q($qKey = null, $qVal = null)
     {
-        if (func_num_args() === 2) {
+        if (func_num_args() === 2)
+        {
             $this->query[$qKey] = $qVal;
             return $this;
-        } elseif (func_num_args() === 1) {
-            return $this->query[$qKey] ?? null;
-        } else {
-            return $this->query;
         }
+
+        if (func_num_args() === 1)
+        {
+            if (is_callable($qKey)) {
+                $this->query = call_user_func($qKey, $this->query);
+                return $this;
+            }
+
+            return $this->query[$qKey] ?? null;
+        }
+
+        return $this->query;
     }
 
     public function fragment($arg = null)
@@ -158,10 +175,7 @@ class Url
         return $this;
     }
 
-    /**
-     * @param Url $other
-     */
-    private function copy($other)
+    private function copy(Url $other): void
     {
         $this->scheme = $other->scheme;
         $this->host = $other->host;
@@ -171,15 +185,14 @@ class Url
         $this->fragment = $other->fragment;
     }
 
-    private function parseQs($qs)
+    private function parseQs($qs): ?array
     {
         parse_str($qs, $arr);
         return $arr;
     }
 
-    private function buildQs()
+    private function buildQs(): string
     {
         return $this->query ? http_build_query($this->query) : '';
     }
-
 }
