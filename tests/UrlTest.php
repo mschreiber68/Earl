@@ -112,6 +112,14 @@ class UrlTest extends TestCase
         self::assertSame($q, $url->q());
     }
 
+    public function testNoHostPrintsPartialUrl()
+    {
+        $url = Url::from('/my/path?a=1#frag')
+            ->q('b', 2);
+
+        self::assertEquals('/my/path?a=1&b=2#frag', $url);
+    }
+
     public function testDefaults()
     {
         Url::defaults(['host' => 'website.com']);

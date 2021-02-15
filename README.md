@@ -81,6 +81,18 @@ $url = Url::from('http://website.com')->q('a', '(myparam)! is encoded');
 assert($url == 'http://website.com?a=%28myparam%29%21+is+encoded');
 ```
 
+### Partial URLs
+If the host is omitted, the URL will be assumed to a be a "partial" URL consisting of only the path, query, and fragment.
+```
+$url = Url::from([
+    'path' => '/my/path', 
+    'q' => ['a' => 1],
+    'fragment' => 'frag
+]);
+
+assert($url == '/my/path?a=1#frag');
+```
+
 ### Auth
 ```
 $url = Url::from('http://website.com')
