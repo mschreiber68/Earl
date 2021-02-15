@@ -82,7 +82,7 @@ assert($url == 'http://website.com?a=%28myparam%29%21+is+encoded');
 ```
 
 ### Partial URLs
-If the host is omitted, the URL will be assumed to a be a "partial" URL consisting of only the path, query, and fragment.
+If the host is omitted, the URL will be a "partial" URL consisting of only the path, query, and fragment.
 ```
 $url = Url::from([
     'path' => '/my/path', 
