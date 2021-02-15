@@ -81,6 +81,15 @@ $url = Url::from('http://website.com')->q('a', '(myparam)! is encoded');
 assert($url == 'http://website.com?a=%28myparam%29%21+is+encoded');
 ```
 
+### Auth
+```
+$url = Url::from('http://website.com')
+    ->user('me@email.com')
+    ->pass('secret');
+
+assert($url == 'http://me%40email.com:secret@website.com');
+```
+
 ### Global defaults
 You may be working in a context where most of the URLs you build will have the same scheme, host, etc.
 You can set global defaults for these values:

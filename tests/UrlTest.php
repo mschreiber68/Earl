@@ -44,6 +44,15 @@ class UrlTest extends TestCase
         self::assertSame('ftp', $url->scheme());
     }
 
+    public function testUserPass()
+    {
+        $url = Url::from('http://website.com')
+            ->user('me@email.com')
+            ->pass('secret');
+
+        self::assertEquals('http://me%40email.com:secret@website.com', $url);
+    }
+
     public function testPath()
     {
         $url = Url::from('https://website.com');

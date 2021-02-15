@@ -94,12 +94,22 @@ class Url
             return $fullPath;
         }
 
-        $url = $this->host;
-        if ($this->scheme) {
-            $url = "{$this->scheme}://{$url}";
-        }
-        if ($this->port) {
-            $url .= ":{$this->port}";
+        $url = '';
+        if ($this->host) {
+            if ($this->scheme) {
+                $url .= "{$this->scheme}://";
+            }
+            if ($this->user) {
+                $url .= urlencode($this->user);
+                if ($this->pass) {
+                    $url .= ":" . urlencode($this->pass);
+                }
+                $url .= '@';
+            }
+            $url .= $this->host;
+            if ($this->port) {
+                $url .= ":{$this->port}";
+            }
         }
 
         return $url . $fullPath;
