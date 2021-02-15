@@ -21,7 +21,7 @@ class UrlTest extends TestCase
         self::assertSame(['a' => '1', 'b' => '2'], $url->q());
         self::assertSame('banana', $url->fragment());
 
-        self::assertSame($s, (string) $url);
+        self::assertEquals($s, $url);
     }
 
     public function testFromArray()
@@ -32,7 +32,7 @@ class UrlTest extends TestCase
             'query' => ['a' => 1]
         ]);
 
-        self::assertSame('https://website.com:443?a=1', (string) $url);
+        self::assertEquals('https://website.com:443?a=1', $url);
     }
 
     public function testScheme()
@@ -52,10 +52,10 @@ class UrlTest extends TestCase
         $url->path('my/path');
         self::assertSame('/my/path', $url->path());
 
-        $url->path(function ($path) { return $path . '/next'; });
+        $url->path($url->path() . '/next');
         self::assertSame('/my/path/next', $url->path());
 
-        self::assertSame('https://website.com/my/path/next', (string) $url);
+        self::assertEquals('https://website.com/my/path/next', $url);
     }
 
     public function testSetQueryValue()
@@ -63,17 +63,14 @@ class UrlTest extends TestCase
         $url = Url::from('https://website.com')->q('a', 1);
 
         self::assertSame(1, $url->q('a'));
-        self::assertSame('https://website.com?a=1', (string) $url);
+        self::assertEquals('https://website.com?a=1', $url);
     }
 
-    public function testSetQueryWithCallable()
+    public function testSetQueryParamNullRemovesParam()
     {
-        $url = Url::from('http://website.com?a=1')->q(function ($q) {
-            $q['a'] += 1;
-            return $q;
-        });
+        $url = Url::from('http://website.com?a=1')->q('a', null);
 
-        self::assertSame('http://website.com?a=2', (string) $url);
+        self::assertEquals('http://website.com', $url);
     }
 
     public function testQueryUrlEncoding()
@@ -81,7 +78,14 @@ class UrlTest extends TestCase
         $url = Url::from('http://website.com')
             ->q('a', '(myparam)! is encoded');
 
-        self::assertSame('http://website.com?a=%28myparam%29%21+is+encoded', (string) $url);
+        self::assertEquals('http://website.com?a=%28myparam%29%21+is+encoded', $url);
+    }
+
+    public function testQueryUrlDecoding()
+    {
+        $url = Url::from('http://website.com?a=%28myparam%29%21+is+encoded');
+
+        self::assertSame('(myparam)! is encoded', $url->q('a'));
     }
 
     public function testQueryWithArrays()
@@ -93,7 +97,7 @@ class UrlTest extends TestCase
 
         $url = Url::from('http://website.com')->q($q);
 
-        self::assertSame('http://website.com?a=1&b%5B0%5D=2&b%5B1%5D=3&b%5B2%5D=4', (string) $url);
+        self::assertEquals('http://website.com?a=1&b%5B0%5D=2&b%5B1%5D=3&b%5B2%5D=4', $url);
 
         $url = Url::from('http://website.com?a=1&b%5B0%5D=2&b%5B1%5D=3&b%5B2%5D=4');
         self::assertSame($q, $url->q());
@@ -104,11 +108,11 @@ class UrlTest extends TestCase
         Url::defaults(['host' => 'website.com']);
         $url = Url::from('/my/path?a=1');
 
-        self::assertSame('https://website.com/my/path?a=1', (string) $url);
+        self::assertEquals('https://website.com/my/path?a=1', $url);
 
         Url::defaults();
         $url = Url::from('/my/path?a=1');
 
-        self::assertSame('/my/path?a=1', (string) $url);
+        self::assertEquals('/my/path?a=1', $url);
     }
 }

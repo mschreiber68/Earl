@@ -35,6 +35,7 @@ class Url
     }
 
     /**
+     * @param string|Url|array $obj
      * @throws \InvalidArgumentException
      */
     public static function from($obj): self
@@ -102,7 +103,14 @@ class Url
         }
 
         return $url . $fullPath;
+    }
 
+    /**
+     * Alias for __toString()
+     */
+    public function str(): string
+    {
+        return $this->__toString();
     }
 
     public function scheme(string $arg = '')
@@ -157,20 +165,13 @@ class Url
 
     public function path($arg = null)
     {
-        if (func_num_args() === 0)
-        {
+        if (func_num_args() === 0) {
             return $this->path;
         }
 
-        if (is_callable($arg))
-        {
-            $this->path = call_user_func($arg, $this->path);
-        } else {
-            $this->path = $arg;
-        }
+        $this->path = $arg;
 
-        if ($this->path && strpos($this->path, '/') !== 0)
-        {
+        if ($this->path && strpos($this->path, '/') !== 0) {
             $this->path = '/' . $this->path;
         }
         return $this;
@@ -178,19 +179,17 @@ class Url
 
     public function q($qKey = null, $qVal = null)
     {
-        if (func_num_args() === 2)
-        {
-            $this->query[$qKey] = $qVal;
+        if (func_num_args() === 2) {
+            if ($qVal === null) {
+                unset($this->query[$qKey]);
+            } else {
+                $this->query[$qKey] = $qVal;
+            }
+
             return $this;
         }
 
-        if (func_num_args() === 1)
-        {
-            if (is_callable($qKey)) {
-                $this->query = call_user_func($qKey, $this->query);
-                return $this;
-            }
-
+        if (func_num_args() === 1) {
             if (is_array($qKey)) {
                 $this->query = $qKey;
                 return $this;
@@ -212,7 +211,7 @@ class Url
         return $this;
     }
 
-    private function parseQs($qs): ?array
+    private function parseQs(string $qs): ?array
     {
         parse_str($qs, $arr);
         return $arr;
@@ -220,6 +219,7 @@ class Url
 
     private function buildQs(): string
     {
-        return $this->query ? http_build_query($this->query) : '';
+        $query = array_filter($this->query, static function ($val) { return $val !== null; });
+        return $query ? http_build_query($query) : '';
     }
 }
