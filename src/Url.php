@@ -20,7 +20,7 @@ class Url
     {
         $this->scheme = self::$defaultScheme;
         $this->host = self::$defaultHost;
-        $this->port = '';
+        $this->port = null;
         $this->user = '';
         $this->pass = '';
         $this->path = '';
@@ -54,7 +54,7 @@ class Url
 
             $url->scheme = $parsed['scheme'] ?: self::$defaultScheme;
             $url->host = $parsed['host'] ?? self::$defaultHost;
-            $url->port = $parsed['port'] ?? '';
+            $url->port = $parsed['port'] ?? null;
             $url->user = $parsed['user'] ?? '';
             $url->pass = $parsed['pass'] ?? '';
             $url->path = $parsed['path'] ?? '';
@@ -67,7 +67,7 @@ class Url
         if (is_array($obj)) {
             $url->scheme($obj['scheme'] ?? self::$defaultScheme);
             $url->host($obj['host'] ?? self::$defaultScheme);
-            $url->port($obj['port'] ?? '');
+            $url->port($obj['port'] ?? null);
             $url->user($obj['user'] ?? '');
             $url->pass($obj['pass'] ?? '');
             $url->path($obj['path'] ?? '');
@@ -143,7 +143,7 @@ class Url
         return $this;
     }
 
-    public function host($arg = null)
+    public function host(string $arg = '')
     {
         if (func_num_args() === 0) {
             return $this->host;
@@ -153,7 +153,7 @@ class Url
         return $this;
     }
 
-    public function port($arg = null)
+    public function port(?int $arg = null)
     {
         if (func_num_args() === 0) {
             return $this->port;
@@ -163,7 +163,7 @@ class Url
         return $this;
     }
 
-    public function path($arg = null)
+    public function path(string $arg = '')
     {
         if (func_num_args() === 0) {
             return $this->path;
@@ -201,7 +201,7 @@ class Url
         return $this->query;
     }
 
-    public function fragment($arg = null)
+    public function fragment(string $arg = '')
     {
         if (func_num_args() === 0) {
             return $this->fragment;

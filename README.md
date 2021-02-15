@@ -26,6 +26,9 @@ $url3 = Url::from([
 
 // cloneable
 $url4 = clone $url3;
+
+// Create empty url
+$url5 = new Url();
 ```
 
 #### Printing:
