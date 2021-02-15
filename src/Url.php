@@ -42,10 +42,10 @@ class Url
         $url = new self();
 
         if ($obj instanceof self) {
-            $url->copy($obj);
+            return clone $obj;
         }
 
-        else if (is_string($obj)) {
+        if (is_string($obj)) {
             $parsed = parse_url($obj);
             if ($parsed === false) {
                 throw new \InvalidArgumentException("Failed to parse URL string: {$obj}");
@@ -59,12 +59,24 @@ class Url
             $url->path = $parsed['path'] ?? '';
             $url->query = isset($parsed['query']) ? $url->parseQs($parsed['query']) : [];
             $url->fragment = $parsed['fragment'] ?? '';
-        }
-        else {
-            throw new \InvalidArgumentException("Invalid type: " . gettype($obj));
+
+            return $url;
         }
 
-        return $url;
+        if (is_array($obj)) {
+            $url->scheme($obj['scheme'] ?? self::$defaultScheme);
+            $url->host($obj['host'] ?? self::$defaultScheme);
+            $url->port($obj['port'] ?? '');
+            $url->user($obj['user'] ?? '');
+            $url->pass($obj['pass'] ?? '');
+            $url->path($obj['path'] ?? '');
+            $url->q($obj['query'] ?? $obj['q'] ?? []);
+            $url->fragment($obj['fragment'] ?? '');
+
+            return $url;
+        }
+
+        throw new \InvalidArgumentException("Invalid type: " . gettype($obj));
     }
 
     public function __toString()
@@ -93,13 +105,33 @@ class Url
 
     }
 
-    public function scheme($arg = null)
+    public function scheme(string $arg = '')
     {
         if (func_num_args() === 0) {
             return $this->scheme;
         }
 
         $this->scheme = str_replace([':', '/'], [], $arg);
+        return $this;
+    }
+
+    public function user(string $arg = '')
+    {
+        if (func_num_args() === 0) {
+            return $this->user;
+        }
+
+        $this->user = $arg;
+        return $this;
+    }
+
+    public function pass(string $arg = '')
+    {
+        if (func_num_args() === 0) {
+            return $this->pass;
+        }
+
+        $this->pass = $arg;
         return $this;
     }
 
@@ -137,7 +169,7 @@ class Url
             $this->path = $arg;
         }
 
-        if (strpos($this->path, '/') !== 0)
+        if ($this->path && strpos($this->path, '/') !== 0)
         {
             $this->path = '/' . $this->path;
         }
@@ -159,6 +191,11 @@ class Url
                 return $this;
             }
 
+            if (is_array($qKey)) {
+                $this->query = $qKey;
+                return $this;
+            }
+
             return $this->query[$qKey] ?? null;
         }
 
@@ -173,16 +210,6 @@ class Url
 
         $this->fragment = $arg;
         return $this;
-    }
-
-    private function copy(Url $other): void
-    {
-        $this->scheme = $other->scheme;
-        $this->host = $other->host;
-        $this->port = $other->port;
-        $this->path = $other->path;
-        $this->query = $other->query;
-        $this->fragment = $other->fragment;
     }
 
     private function parseQs($qs): ?array

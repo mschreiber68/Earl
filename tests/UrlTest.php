@@ -24,6 +24,17 @@ class UrlTest extends TestCase
         self::assertSame($s, (string) $url);
     }
 
+    public function testFromArray()
+    {
+        $url = Url::from([
+            'host' => 'website.com',
+            'port' => 443,
+            'query' => ['a' => 1]
+        ]);
+
+        self::assertSame('https://website.com:443?a=1', (string) $url);
+    }
+
     public function testScheme()
     {
         $url = Url::from('https:');
@@ -71,6 +82,21 @@ class UrlTest extends TestCase
             ->q('a', '(myparam)! is encoded');
 
         self::assertSame('http://website.com?a=%28myparam%29%21+is+encoded', (string) $url);
+    }
+
+    public function testQueryWithArrays()
+    {
+        $q = [
+            'a' => '1',
+            'b' => ['2', '3', '4']
+        ];
+
+        $url = Url::from('http://website.com')->q($q);
+
+        self::assertSame('http://website.com?a=1&b%5B0%5D=2&b%5B1%5D=3&b%5B2%5D=4', (string) $url);
+
+        $url = Url::from('http://website.com?a=1&b%5B0%5D=2&b%5B1%5D=3&b%5B2%5D=4');
+        self::assertSame($q, $url->q());
     }
 
     public function testDefaults()
