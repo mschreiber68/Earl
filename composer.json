@@ -1,5 +1,8 @@
 {
     "name": "mschreiber/earl",
+    "description": "Earl is a single class library for parsing, building, modifying, and printing URL strings.",
+    "keywords": ["url"],
+    "license": "MIT",
     "authors": [
         {
             "name": "Mike Schreiber",
@@ -13,6 +16,9 @@
     },
     "autoload": {
         "psr-4": {"Earl\\": "src/"}
+    },
+    "autoload-dev": {
+        "psr-4": {"Earl\\Tests\\":  "tests/"}
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5"

@@ -1,5 +1,7 @@
 <?php
 
+namespace Earl\Tests;
+
 use Earl\Url;
 use PHPUnit\Framework\TestCase;
 

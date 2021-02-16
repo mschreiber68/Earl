@@ -20,7 +20,6 @@ class Url
     {
         $this->scheme = self::$defaultScheme;
         $this->host = self::$defaultHost;
-        $this->port = null;
         $this->user = '';
         $this->pass = '';
         $this->path = '';
